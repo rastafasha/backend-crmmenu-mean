@@ -20,9 +20,9 @@ const getTodo = async(req, res = response) => {
     const categorias = await Categoria.find({ nombre: regex });
     const categoriaIds = categorias.map(cat => cat._id);
 
-    // Find matching paises
-    const paises = await Pais.find({ pais: regex });
-    const paisIds = paises.map(p => p._id);
+    // Find matching pais
+    const matchingPaises = await Pais.find({ pais: regex });
+    const paisIds = matchingPaises.map(p => p._id);
 
     // Then, find projects that match either name or category or pais in the list
     const projectsFilter = {
@@ -38,19 +38,19 @@ const getTodo = async(req, res = response) => {
         projectsFilter.type = typeFilter;
     }
 
-    const [usuarios, projects, categoria, paises] = await Promise.all([
+    const [usuarios, projects, categoria] = await Promise.all([
         Usuario.find({ username: regex }),
         Project.find(projectsFilter).populate('category', 'nombre'),
         Categoria.find({ nombre: regex }),
-        Pais.find({ pais: regex }),
     ]);
+    const searchPaises = Pais.find({ pais: regex });
 
     res.json({
         ok: true,
         usuarios,
         projects,
         categoria,
-        paises
+        paises: await searchPaises
     });
 }
 
@@ -75,9 +75,9 @@ const getDocumentosColeccion = async(req, res = response) => {
             const categorias = await Categoria.find({ nombre: regex });
             const categoriaIds = categorias.map(cat => cat._id);
 
-            // Find matching paises
-            const paises = await Pais.find({ pais: regex });
-            const paisIds = paises.map(p => p._id);
+            // Find matching pais
+            const matchingPaises = await Pais.find({ pais: regex });
+            const paisIds = matchingPaises.map(p => p._id);
 
             // Then, find projects that match either name or category or pais
             let projectsFilter = {
