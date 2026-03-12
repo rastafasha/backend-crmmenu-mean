@@ -2,6 +2,7 @@ const { response } = require('express');
 const Usuario = require('../models/usuario');
 const Project = require('../models/project');
 const Categoria = require('../models/categoria');
+const Pais = require('../models/pais');
 
 const getTodo = async(req, res = response) => {
 
@@ -19,30 +20,37 @@ const getTodo = async(req, res = response) => {
     const categorias = await Categoria.find({ nombre: regex });
     const categoriaIds = categorias.map(cat => cat._id);
 
-    // Then, find projects that match either name or category in the list
+    // Find matching paises
+    const paises = await Pais.find({ pais: regex });
+    const paisIds = paises.map(p => p._id);
+
+    // Then, find projects that match either name or category or pais in the list
     const projectsFilter = {
         $or: [
             { name: regex },
             { ubicacion: regex },
             { tipoMenu: regex },
-            { category: { $in: categoriaIds } }
+            { category: { $in: categoriaIds } },
+            { pais: { $in: paisIds } }
         ]
     };
     if (typeFilter) {
         projectsFilter.type = typeFilter;
     }
 
-    const [usuarios, projects, categoria] = await Promise.all([
+    const [usuarios, projects, categoria, paises] = await Promise.all([
         Usuario.find({ username: regex }),
         Project.find(projectsFilter).populate('category', 'nombre'),
         Categoria.find({ nombre: regex }),
+        Pais.find({ pais: regex }),
     ]);
 
     res.json({
         ok: true,
         usuarios,
         projects,
-        categoria
+        categoria,
+        paises
     });
 }
 
@@ -67,13 +75,18 @@ const getDocumentosColeccion = async(req, res = response) => {
             const categorias = await Categoria.find({ nombre: regex });
             const categoriaIds = categorias.map(cat => cat._id);
 
-            // Then, find projects that match either name or category in the list
+            // Find matching paises
+            const paises = await Pais.find({ pais: regex });
+            const paisIds = paises.map(p => p._id);
+
+            // Then, find projects that match either name or category or pais
             let projectsFilter = {
                 $or: [
                     { name: regex },
                     { ubicacion: regex },
                     { tipoMenu: regex },
-                    { category: { $in: categoriaIds } }
+                    { category: { $in: categoriaIds } },
+                    { pais: { $in: paisIds } }
                 ]
             };
             if (typeFilter) {
@@ -81,10 +94,13 @@ const getDocumentosColeccion = async(req, res = response) => {
             }
             data = await Project.find(projectsFilter).populate('category', 'nombre');
             break;
+        case 'pais':
+            data = await Pais.find({ pais: regex });
+            break;
         default:
             return res.status(400).json({
                 ok: false,
-                msg: 'la tabla debe ser usuarios/categorias/projects'
+                msg: 'la tabla debe ser usuarios/categorias/projects/pais'
             });
     }
 
