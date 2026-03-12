@@ -50,7 +50,7 @@ const getTodo = async(req, res = response) => {
         usuarios,
         projects,
         categoria,
-        paises: await searchPaises
+        pais: await searchPaises
     });
 }
 
