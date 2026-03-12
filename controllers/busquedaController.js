@@ -24,6 +24,7 @@ const getTodo = async(req, res = response) => {
         $or: [
             { name: regex },
             { ubicacion: regex },
+            { tipoMenu: regex },
             { category: { $in: categoriaIds } }
         ]
     };
@@ -71,6 +72,7 @@ const getDocumentosColeccion = async(req, res = response) => {
                 $or: [
                     { name: regex },
                     { ubicacion: regex },
+                    { tipoMenu: regex },
                     { category: { $in: categoriaIds } }
                 ]
             };
