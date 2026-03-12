@@ -23,6 +23,7 @@ const getTodo = async(req, res = response) => {
     const projectsFilter = {
         $or: [
             { name: regex },
+            { ubicacion: regex },
             { category: { $in: categoriaIds } }
         ]
     };
@@ -69,6 +70,7 @@ const getDocumentosColeccion = async(req, res = response) => {
             let projectsFilter = {
                 $or: [
                     { name: regex },
+                    { ubicacion: regex },
                     { category: { $in: categoriaIds } }
                 ]
             };

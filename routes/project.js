@@ -11,7 +11,8 @@ const {
     updateProject,
     deleteProject,
     getProjectsByUser,
-    updateStatus
+    updateStatus,
+    listarProyectPorCategoria
 } = require('../controllers/projectController.js');
 
 const { validarJWT } = require('../middlewares/validar-jwt');
@@ -23,9 +24,12 @@ router.get('/',
     validarJWT, 
     getProjects);
 router.get('/user/:id',   getProjectsByUser);
+router.get('/category/:nombre',   listarProyectPorCategoria);
+
 router.get('/:id',  
     validarJWT,
      getProject);
+
 router.post('/store',  
     validarJWT, 
      createProject 

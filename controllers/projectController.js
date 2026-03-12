@@ -131,19 +131,26 @@ function updateStatus(req, res) {
     })
 }
 
-const listarProyectPorCategoria = (req, res) => {
-    var id = req.params['id'];
-    Project.find({ categoria: id }, (err, proyecto_data) => {
-        if (!err) {
-            if (proyecto_data) {
-                res.status(200).send({ categoria: proyecto_data });
-            } else {
-                res.status(500).send({ error: err });
-            }
-        } else {
-            res.status(500).send({ error: err });
+const listarProyectPorCategoria = async (req, res) => {
+    var nombre = req.params['nombre'];
+    try {
+        // First, find the category by name
+        const Categoria = require('../models/categoria');
+        const categoria = await Categoria.findOne({ nombre: nombre });
+        
+        if (!categoria) {
+            return res.status(404).json({ message: 'Categoría no encontrada' });
         }
-    });
+        
+        // Then, find projects using the category's ObjectId
+        const projects = await Project.find({ category: categoria._id })
+            .populate('category')
+            .populate('pais');
+        
+        res.status(200).send({ projects: projects });
+    } catch (err) {
+        res.status(500).send({ error: err });
+    }
 }
 
 
@@ -155,6 +162,7 @@ module.exports = {
     deleteProject,
     updateProject,
     updateStatus,
+    listarProyectPorCategoria
 
 
 };

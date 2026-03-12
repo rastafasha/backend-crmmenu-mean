@@ -38,6 +38,11 @@ const projectSchema = new mongoose.Schema(
       required: false,
       default: Date.now,
     },
+    dateAprobado: {
+      type: String,
+      required: false,
+      default: Date.now,
+    },
     
   },
   {
