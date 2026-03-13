@@ -7,7 +7,7 @@ const usuarioSchema = Schema({
     email: { type: String, require: true, unique: true },
     password: { type: String, require: true },
     role: { type: String, require: true, default: 'USER' },
-    terminos: { type: Boolean, require: true },
+    terminos: { type: Boolean, require: false },
     google: { type: Boolean, default: false },
     profile: { type: Schema.Types.ObjectId, ref: 'Profile' },
     project: { type: Schema.Types.ObjectId, ref: 'Project' },

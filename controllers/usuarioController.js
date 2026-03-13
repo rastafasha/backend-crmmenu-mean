@@ -34,7 +34,7 @@ const crearUsuarios = async(req, res = response) => {
         const usuario = new Usuario({
             username: body.username,
             email: body.email,
-            terminos: body.terminos,
+            // terminos: body.terminos,
             role: body.role,
         });
 
@@ -141,29 +141,8 @@ function dispatch_emails(req, res) {
 
 const getUsuariosList = async(req, res) => {
 
-    // const desde = Number(req.query.desde) || 0;
-
-    // const [usuarios, total] = await Promise.all([
-    //     Usuario
-    //     .find({}, 'username email role google') //esto ultimo filtra el resultado
-    //     .skip(desde)
-    //     .populate('profile')
-    //     .limit(5), //pagina el resultado
-
-    //     Usuario.countDocuments() //cuenta el total
-    // ]);
-
-    // res.json({
-    //     ok: true,
-    //     usuarios,
-    //     total,
-    //     //uid: req.uid
-    // });
 
     const usuarios = await Usuario.find({})
-        .populate('pago')
-        .populate('blog')
-        .populate('subcription')
         .populate('profile');
 
     res.json({
@@ -176,14 +155,6 @@ const getUsuariosList = async(req, res) => {
 };
 
 const getAllUsers = async(req, res) => {
-
-    // const usuarios = await Usuario.find({})
-    //     .populate('profile', 'first_name last_name pais estado ciudad telhome');
-
-    // res.json({
-    //     ok: true,
-    //     usuarios
-    // });
     const usuarios = await Usuario.find({})
         .populate('project')
         .populate('profile');
