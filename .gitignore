@@ -28,6 +28,8 @@
 !.vscode/extensions.json
 .history/*
 
+.env
+
 
 # System files
 .DS_Store
