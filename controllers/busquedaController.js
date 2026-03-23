@@ -3,6 +3,7 @@ const Usuario = require('../models/usuario');
 const Project = require('../models/project');
 const Categoria = require('../models/categoria');
 const Pais = require('../models/pais');
+const Cliente = require('../models/cliente');
 
 const getTodo = async(req, res = response) => {
 
@@ -24,6 +25,7 @@ const getTodo = async(req, res = response) => {
     const matchingPaises = await Pais.find({ pais: regex });
     const paisIds = matchingPaises.map(p => p._id);
 
+
     // Then, find projects that match either name or category or pais in the list
     const projectsFilter = {
         $or: [
@@ -38,10 +40,11 @@ const getTodo = async(req, res = response) => {
         projectsFilter.type = typeFilter;
     }
 
-    const [usuarios, projects, categoria] = await Promise.all([
+    const [usuarios, projects, categoria, clientes] = await Promise.all([
         Usuario.find({ username: regex }),
         Project.find(projectsFilter).populate('category', 'nombre'),
         Categoria.find({ nombre: regex }),
+        Cliente.find({ nombre: regex }),
     ]);
     const searchPaises = Pais.find({ pais: regex });
 
@@ -50,6 +53,7 @@ const getTodo = async(req, res = response) => {
         usuarios,
         projects,
         categoria,
+        clientes,
         paises: await searchPaises
     });
 }
@@ -97,10 +101,13 @@ const getDocumentosColeccion = async(req, res = response) => {
         case 'pais':
             data = await Pais.find({ pais: regex });
             break;
+        case 'clientes':
+            data = await Cliente.find({ cliente: regex });
+            break;
         default:
             return res.status(400).json({
                 ok: false,
-                msg: 'la tabla debe ser usuarios/categorias/projects/pais'
+                msg: 'la tabla debe ser usuarios/categorias/projects/pais/clientes'
             });
     }
 
