@@ -6,7 +6,6 @@ const getPayments = async (req, res) => {
         const payments = await Payment.find()
             .sort({ createdAt: -1 })
             .populate('cliente')
-            .populate('usuario')
         payments.sort((a, b) => b.createdAt - a.createdAt);
 
 
@@ -39,9 +38,28 @@ const getPaymentsByUser = async (req, res) => {
 
 const createPayment = async (req, res) => {
     try {
-        const { amount, cliente, tipo_pago, referencia, vendedorId, adminId, ceoId } = req.body;
+        // Desestructuramos lo que viene de Angular
+        const { 
+            amount, 
+            cliente, 
+            tipo_pago, 
+            referencia, 
+            vendedorId, 
+            adminId, 
+            ceoId,
+            metodo_pago,
+            bank_destino,
+            fecha_verificacion
+        } = req.body;
 
-        // Calculamos la división del 33.3%
+        // Validación de seguridad: que los IDs no vengan vacíos
+        if (!vendedorId || !adminId || !ceoId) {
+            return res.status(400).json({ 
+                ok: false, 
+                msg: 'Faltan los IDs de los asociados para la repartición' 
+            });
+        }
+
         const cuota = Number(amount) / 3;
 
         const payment = new Payment({
@@ -49,13 +67,16 @@ const createPayment = async (req, res) => {
             amount: Number(amount),
             tipo_pago,
             referencia,
-            // Guardamos a quién le toca qué parte para futuros reportes de "sueldo"
+            metodo_pago,
+            bank_destino,
+            fecha_verificacion,
+            // Guardamos la repartición estructurada
             reparticion: {
                 vendedor: { id: vendedorId, monto: cuota },
                 admin: { id: adminId, monto: cuota },
                 ceo: { id: ceoId, monto: cuota }
             },
-            usuario: req.uid // El usuario que registró el pago en el sistema
+            usuario: req.uid // El admin que está operando el sistema
         });
 
         const paymentDB = await payment.save();
@@ -66,7 +87,11 @@ const createPayment = async (req, res) => {
         });
 
     } catch (error) {
-        res.status(500).json({ ok: false, msg: 'Error al registrar el pago' });
+        console.error(error); // Revisa la consola de Node para ver el error exacto
+        res.status(500).json({
+            ok: false,
+            msg: 'Error interno en el servidor, revise los logs'
+        });
     }
 };
 
@@ -74,7 +99,6 @@ const getPayment = async (req, res) => {
     try {
         const payment = await Payment.findById(req.params.id)
             .populate('cliente')
-            .populate('usuario')
 
         if (!payment) return res.status(404).json({ msg: 'payment not found' })
         res.json({
@@ -96,15 +120,31 @@ const deletePayment = async (req, res) => {
     }
 };
 const updatePayment = async (req, res) => {
+    const id = req.params.id;
     try {
-        const payment = await Payment.findByIdAndUpdate(req.params.id, req.body, { new: true })
-        if (!payment) return res.status(404).json({ msg: 'payment not found' })
-        res.json({
-            ok: true,
-            payment
-        });
+        const { amount, vendedorId, adminId, ceoId, ...rest } = req.body;
+        
+        let updateData = { ...rest };
+
+        // Si se envió un nuevo monto, recalculamos la repartición
+        if (amount) {
+            const cuota = Number(amount) / 3;
+            updateData.amount = Number(amount);
+            updateData.reparticion = {
+                vendedor: { id: vendedorId, monto: cuota },
+                admin: { id: adminId, monto: cuota },
+                ceo: { id: ceoId, monto: cuota }
+            };
+        }
+
+        const payment = await Payment.findByIdAndUpdate(id, updateData, { new: true });
+        
+        if (!payment) return res.status(404).json({ ok: false, msg: 'Pago no encontrado' });
+        
+        res.json({ ok: true, payment });
     } catch (error) {
-        return res.status(404).json({ msg: 'payment not found' })
+        console.log(error);
+        res.status(500).json({ ok: false, msg: 'Error al actualizar' });
     }
 };
 
