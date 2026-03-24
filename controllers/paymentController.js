@@ -99,6 +99,21 @@ const getPayment = async (req, res) => {
     try {
         const payment = await Payment.findById(req.params.id)
             .populate('cliente')
+            .populate({
+                path: 'reparticion.vendedor.id',
+                select: 'username',
+                model: 'Usuario'
+            })
+            .populate({
+                path: 'reparticion.admin.id', 
+                select: 'username',
+                model: 'Usuario'
+            })
+            .populate({
+                path: 'reparticion.ceo.id',
+                select: 'username', 
+                model: 'Usuario'
+            })
 
         if (!payment) return res.status(404).json({ msg: 'payment not found' })
         res.json({
