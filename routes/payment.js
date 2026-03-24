@@ -19,16 +19,12 @@ const { validarJWT } = require('../middlewares/validar-jwt');
 const { check } = require('express-validator');
 const { validarCampos } = require('../middlewares/validar-campos');
 
-router.get('/', 
-    validarJWT, 
-    getPayments);
+router.get('/',  validarJWT, getPayments);
+router.get('/monthlyreport',  validarJWT, getMonthlyReport);
 
-router.get('/:id', 
-    // validarJWT, 
-    getPayment);
+router.get('/:id',  validarJWT, getPayment);
 router.get('/user/:id', validarJWT, getPaymentsByUser);
 
-router.get('/monthlyreport', validarJWT, getMonthlyReport);
 
 router.post('/store', [
     validarJWT,

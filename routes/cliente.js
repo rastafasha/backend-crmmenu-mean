@@ -20,9 +20,7 @@ const { check } = require('express-validator');
 const { validarCampos } = require('../middlewares/validar-campos');
 
 
-router.get('/',  
-    validarJWT, 
-    getClientes);
+router.get('/',  validarJWT, getClientes); 
 router.get('/user/:id', getClientesByUser);
 router.get('/category/:nombre', listarClientePorCategoria);
 

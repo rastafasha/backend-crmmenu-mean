@@ -185,21 +185,29 @@ const updateStatus = async (req, res) => {
 
 const getMonthlyReport = async (req, res) => {
     try {
-        const { mes, anio } = req.query; // Ejemplo: ?mes=3&anio=2024
+        // 1. Forzar la conversión a Números (Importante)
+        const month = parseInt(req.query.month);
+        const year = parseInt(req.query.year);
 
-        // Creamos el rango de fechas (del día 1 al último del mes)
-        const startDate = new Date(anio, mes - 1, 1);
-        const endDate = new Date(anio, mes, 0, 23, 59, 59);
+        if (isNaN(month) || isNaN(year)) {
+            return res.status(400).json({ ok: false, msg: "Mes y año son requeridos como números" });
+        }
+
+        // 2. Crear fechas de inicio y fin exactas
+        const startDate = new Date(year, month - 1, 1, 0, 0, 0); // Día 1 a las 00:00:00
+        const endDate = new Date(year, month, 0, 23, 59, 59, 999); // Último día a las 23:59:59
 
         const report = await Payment.aggregate([
             {
                 $match: {
-                    status: true, // Solo pagos verificados
-                    createdAt: { $gte: startDate, $lte: endDate }
+                    // status: true, // ¡OJO! Verifica si en tu BD es "true" (booleano) o "COMPLETED" (string)
+                    createdAt: { 
+                        $gte: startDate, 
+                        $lte: endDate 
+                    }
                 }
             },
             {
-                // "Aplanamos" los datos para sumar lo que le toca a cada rol
                 $group: {
                     _id: null,
                     totalVendedores: { $sum: "$reparticion.vendedor.monto" },
@@ -212,16 +220,22 @@ const getMonthlyReport = async (req, res) => {
         ]);
 
         if (report.length === 0) {
-            return res.json({ ok: true, msg: "No hay pagos confirmados en este periodo", report: {} });
+            return res.json({ 
+                ok: true, 
+                msg: "No hay pagos confirmados en este periodo", 
+                rango: { startDate, endDate }, // Para que debuguees qué fechas está buscando
+                report: { totalVendedores: 0, totalAdmins: 0, totalCEOs: 0, granTotal: 0, cantidadPagos: 0 } 
+            });
         }
 
         res.json({
             ok: true,
-            periodo: `${mes}-${anio}`,
+            periodo: `${month}-${year}`,
             report: report[0]
         });
 
     } catch (error) {
+        console.error(error); // Siempre loguea el error para saber qué falló
         res.status(500).json({ ok: false, msg: 'Error al generar el cierre' });
     }
 };
