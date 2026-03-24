@@ -75,8 +75,8 @@ const envioCorreo = (req, res) => {
         host: 'smtp.gmail.com',
         port: 587,
         auth: {
-            user: 'mercadocreativo@gmail.com',
-            pass: 'brcgdrbbddkmuxhk'
+            user: env.USER_GMAIL,
+                    pass: env.PASS_gmail
         }
     });
 

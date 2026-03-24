@@ -80,8 +80,8 @@ function dispatch_emails(req, res) {
         host: 'smtp.gmail.com',
         port: 587,
         auth: {
-            user: 'mercadocreativo@gmail.com',
-            pass: 'ngxklywwbhyrouxu'
+            user: env.USER_GMAIL,
+                    pass: env.PASS_gmail
         },
         secureConnection: 'false',
         tls: {
@@ -98,7 +98,7 @@ function dispatch_emails(req, res) {
     };
 
     const AdminNotifyEmail = {
-        from: 'mercadocreativo@gmail.com',
+        from: env.USER_GMAIL,
         to: body.admin_email,
         subject: 'Account Registration for ' + user_email + ', with username : ' + username + ' (' + username + ')',
         html: '<h3>Attention Admin , </h3><p>A new User has registered his Access with the following Information: </br> <strong>Username : ' + user_email + '</strong></br><strong>Company Name : ' + username + '</strong></br><strong>Date of Registration : ' + Date.Now + '</strong></p>'
@@ -357,8 +357,8 @@ const actualizarUsuarioRole = async(req, res = response) => {
                 host: 'smtp.gmail.com',
                 port: 587,
                 auth: {
-                    user: 'mercadocreativo@gmail.com',
-                    pass: 'ngxklywwbhyrouxu'
+                    user: env.USER_GMAIL,
+                    pass: env.PASS_gmail
                 },
                 secureConnection: false,
                 tls: {
@@ -369,7 +369,7 @@ const actualizarUsuarioRole = async(req, res = response) => {
 
 
             const mailOptions = {
-                from: 'mercadocreativo@gmail.com',
+                from: env.USER_GMAIL,
                 to: usuarioActualizado.email,
                 subject: '¡Bienvenido! Tu rol ha sido actualizado',
                 html: `
@@ -511,13 +511,13 @@ function set_token_recovery(req, res) {
         host: 'smtp.gmail.com',
         port: 587,
         auth: {
-            user: 'mercadocreativo@gmail.com ',
-            pass: 'ngxklywwbhyrouxu'
+            user: env.USER_GMAIL,
+                    pass: env.PASS_gmail
         }
     }));
 
     var mailOptions = {
-        from: 'mercadocreativo@gmail.com',
+        from: env.USER_GMAIL,
         to: email,
         subject: 'Código de recuperación.',
         text: 'Tu código de recuperacion es: ' + token
