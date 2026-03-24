@@ -20,7 +20,8 @@ const {
     change_password,
     getAllEditores,
     listarProfileUsuario,
-    cambiarAMiembro
+    cambiarAMiembro,
+    actualizarUsuarioRole
 } = require('../controllers/usuarioController');
 const {
     validarJWT,
@@ -74,7 +75,7 @@ router.put('/editarRole/:id', [
     // validarUserRoleOMismoUsuario,
     check('role', 'el role es obligatorio').not().isEmpty(),
     validarCampos
-], actualizarUsuario);
+], actualizarUsuarioRole);
 
 router.put('/editarAdmin/:id', [
     validarJWT,

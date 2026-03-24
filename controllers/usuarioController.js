@@ -81,7 +81,7 @@ function dispatch_emails(req, res) {
         port: 587,
         auth: {
             user: 'mercadocreativo@gmail.com',
-            pass: 'brcgdrbbddkmuxhk'
+            pass: 'ngxklywwbhyrouxu'
         },
         secureConnection: 'false',
         tls: {
@@ -311,6 +311,99 @@ const actualizarUsuario = async(req, res = response) => {
         });
     }
 };
+const actualizarUsuarioRole = async(req, res = response) => {
+    //todo: validar token y comprobar si el usuario es correcto
+
+    const uid = req.params.id;
+
+    try {
+        const usuarioDB = await Usuario.findById(uid);
+        if (!usuarioDB) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'No existe el usuario por ese id'
+            });
+        }
+
+        //actualizaciones
+        const { password, google, email, ...campos } = req.body;
+
+        if (usuarioDB.email !== email) {
+
+            const existeEmail = await Usuario.findOne({ email });
+            if (existeEmail) {
+                return res.status(400).json({
+                    ok: false,
+                    msg: 'Ya existe un usuario con ese email'
+                });
+            }
+        }
+
+        if (!usuarioDB.google) {
+
+            campos.email = email;
+
+        } else if (usuarioDB.email !== email) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Usuario de google no puede cambiar su correo'
+            });
+        }
+        const usuarioActualizado = await Usuario.findByIdAndUpdate(uid, campos, { new: true });
+
+        // Send welcome email if role changed
+        if (campos.role && usuarioDB.role !== campos.role && usuarioActualizado.email) {
+            const transporter = nodemailer.createTransport({
+                host: 'smtp.gmail.com',
+                port: 587,
+                auth: {
+                    user: 'mercadocreativo@gmail.com',
+                    pass: 'ngxklywwbhyrouxu'
+                },
+                secureConnection: false,
+                tls: {
+                    ciphers: 'SSLv3',
+                    rejectUnauthorized: false
+                }
+            });
+
+
+            const mailOptions = {
+                from: 'mercadocreativo@gmail.com',
+                to: usuarioActualizado.email,
+                subject: '¡Bienvenido! Tu rol ha sido actualizado',
+                html: `
+                    <h2>¡Hola, ${usuarioActualizado.username || 'Usuario'}!</h2>
+                    <p>Tu rol ha sido actualizado a <strong>${usuarioActualizado.role}</strong>.</p>
+                    <p>Ahora puedes acceder al sistema con tus nuevos permisos.</p>
+                    <p>Si tienes alguna duda, contacta al administrador.</p>
+                    <p>¡Gracias por usar Zlipmenu!</p>
+                `
+            };
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.error('Error sending welcome email:', error);
+                } else {
+                    console.log('Welcome email sent to', usuarioActualizado.email, info.response);
+                }
+            });
+        }
+
+        res.json({
+            ok: true,
+            usuario: usuarioActualizado
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error inesperado'
+        });
+    }
+};
+
 
 const borrarUsuario = async(req, res) => {
 
@@ -419,7 +512,7 @@ function set_token_recovery(req, res) {
         port: 587,
         auth: {
             user: 'mercadocreativo@gmail.com ',
-            pass: 'brcgdrbbddkmuxhk'
+            pass: 'ngxklywwbhyrouxu'
         }
     }));
 
@@ -541,4 +634,5 @@ module.exports = {
     newest,
     getAllEditores,
     listarProfileUsuario,
+    actualizarUsuarioRole
 };

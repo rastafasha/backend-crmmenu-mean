@@ -17,7 +17,7 @@ const getClientes = async (req, res) => {
             clientes
         });
     } catch (error) {
-        return res.status(500).json({ message: 'Error al obtener proyectos' });
+        return res.status(500).json({ message: 'Error al obtener clientes' });
     }
 };
 const getClientesByUser = async (req, res) => {
