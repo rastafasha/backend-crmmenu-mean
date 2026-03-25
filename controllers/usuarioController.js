@@ -61,7 +61,7 @@ const crearUsuarios = async (req, res = response) => {
         });
 
         const adminNotifyEmail = {
-            from: env.USER_EMAIL,
+            from: `"Soporte ZlipMenu | CRM" <${process.env.USER_EMAIL}>`, 
             to: 'mercadocreativo@gmail.com',
             subject: `Nuevo usuario registrado: ${usuario.username}`,
             html: `
@@ -409,7 +409,7 @@ const actualizarUsuarioRole = async (req, res = response) => {
 
 
             const mailOptions = {
-                from: env.USER_EMAIL,
+                from: `"Soporte ZlipMenu | CRM" <${process.env.USER_EMAIL}>`, 
                 to: usuarioActualizado.email,
                 subject: '¡Bienvenido! Tu rol ha sido actualizado',
                 html: `
