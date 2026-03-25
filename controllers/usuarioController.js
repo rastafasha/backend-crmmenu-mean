@@ -403,7 +403,6 @@ const actualizarUsuarioRole = async (req, res = response) => {
                     pass: env.PASS_email
                 },
                 tls: {
-                    ciphers: 'SSLv3',
                     rejectUnauthorized: false
                 }
             });
@@ -549,17 +548,20 @@ function set_token_recovery(req, res) {
 
 
     var transporter = nodemailer.createTransport(smtpTransport({
-        service: 'gmail',
-        host: 'smtp.gmail.com',
-        port: 587,
+        host: "mail.zlipmenu.com",
+        port: 465,
+        secure: true,
         auth: {
-            user: env.USER_GMAIL,
-            pass: env.PASS_gmail
+            user: env.USER_EMAIL,
+            pass: env.PASS_email
+        },
+        tls: {
+            rejectUnauthorized: false
         }
     }));
 
     var mailOptions = {
-        from: env.USER_GMAIL,
+        from: env.USER_EMAIL,
         to: email,
         subject: 'Código de recuperación.',
         text: 'Tu código de recuperacion es: ' + token
