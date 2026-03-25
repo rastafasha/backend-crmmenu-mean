@@ -47,12 +47,12 @@ const crearUsuarios = async (req, res = response) => {
 
         // Enviar notificación de nuevo usuario al admin
         const adminTransporter = nodemailer.createTransport({
-            host: "mail.zlipmenu.com",
+            host: "zlipmenu.com",
             port: 465,
             secure: true,
             auth: {
-                user: env.USER_EMAIL,
-                pass: env.PASS_email
+                user: process.env.USER_EMAIL,
+                pass: process.env.PASS_email
             },
             tls: {
                 ciphers: 'SSLv3',
@@ -60,7 +60,7 @@ const crearUsuarios = async (req, res = response) => {
             }
         });
 
-        const adminNotifyEmail = {
+            const adminNotifyEmail = {
             from: `"Soporte ZlipMenu | CRM" <${process.env.USER_EMAIL}>`, 
             to: 'mercadocreativo@gmail.com',
             subject: `Nuevo usuario registrado: ${usuario.username}`,
@@ -88,14 +88,6 @@ const crearUsuarios = async (req, res = response) => {
 
         //generar el token - JWT
         const token = await generarJWT(usuario.id);
-
-
-        //emvio por correo
-        // dispatch_emails(req.body);
-        // usuario.password = undefined;
-        // return res.json(usuario);
-        //emvio por correo
-
         res.json({
             ok: true,
             usuario,
@@ -112,73 +104,7 @@ const crearUsuarios = async (req, res = response) => {
 
 
 };
-//emvio por correo
-function dispatch_emails(req, res) {
 
-    let body = req.body;
-
-    const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        auth: {
-            user: env.USER_GMAIL,
-            pass: env.PASS_gmail
-        },
-        secureConnection: 'false',
-        tls: {
-            ciphers: 'SSLv3',
-            rejectUnauthorized: false
-        }
-    });
-
-    const mailOptions = {
-        from: req.body.username,
-        to: req.body.email,
-        subject: 'Account Registration Successful!',
-        html: '<h3>Attention,' + username + ' , </h3><p><h3>Your Account has been successfully setup.</h3></p><p> Please allow a maximum of 24 - 48 Hours for Review and succesful setup and approval of your online account.</p></br>Regards,</br> Online Services.'
-    };
-
-    const AdminNotifyEmail = {
-        from: env.USER_GMAIL,
-        to: body.admin_email,
-        subject: 'Account Registration for ' + user_email + ', with username : ' + username + ' (' + username + ')',
-        html: '<h3>Attention Admin , </h3><p>A new User has registered his Access with the following Information: </br> <strong>Username : ' + user_email + '</strong></br><strong>Company Name : ' + username + '</strong></br><strong>Date of Registration : ' + Date.Now + '</strong></p>'
-    };
-
-    transporter.sendMail(mailOptions, function (error, info) {
-        // if (error) throw error;
-        // return res.send({ error: false, data: info, message: 'OK' });
-        if (error) {
-            return res.json({
-                ok: false,
-                msg: error
-            });
-        };
-
-        return res.json({
-            ok: true,
-            msg: info
-        })
-    })
-
-    transporter.sendMail(AdminNotifyEmail, function (error, info) {
-        // if (error) throw error;
-        // return res.send({ error: false, data: info, message: 'OK' });
-        if (error) {
-            return res.json({
-                ok: false,
-                msg: error
-            });
-        };
-
-        return res.json({
-            ok: true,
-            msg: info
-        })
-    })
-
-}
-//emvio por correo
 
 const getUsuariosList = async (req, res) => {
 
@@ -395,7 +321,7 @@ const actualizarUsuarioRole = async (req, res = response) => {
         // Send welcome email if role changed
         if (campos.role && usuarioDB.role !== campos.role && usuarioActualizado.email) {
             const transporter = nodemailer.createTransport({
-                host: "mail.zlipmenu.com",
+                host: "zlipmenu.com",
                 port: 465,
                 secure: true,
                 auth: {
@@ -548,12 +474,12 @@ function set_token_recovery(req, res) {
 
 
     var transporter = nodemailer.createTransport(smtpTransport({
-        host: "mail.zlipmenu.com",
+        host: "zlipmenu.com",
         port: 465,
         secure: true,
         auth: {
-            user: env.USER_EMAIL,
-            pass: env.PASS_email
+            user: process.env.USER_EMAIL,
+                pass: process.env.PASS_email
         },
         tls: {
             rejectUnauthorized: false
