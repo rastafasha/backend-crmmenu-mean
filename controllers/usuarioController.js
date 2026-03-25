@@ -342,6 +342,7 @@ const actualizarUsuarioRole = async (req, res = response) => {
                     <h2>¡Hola, ${usuarioActualizado.username || 'Usuario'}!</h2>
                     <p>Tu rol ha sido actualizado a <strong>${usuarioActualizado.role}</strong>.</p>
                     <p>Ahora puedes acceder al sistema con tus nuevos permisos.</p>
+                    <p>Puedes acceder a la aplicación por aquí: <a href="https://crm-zlipmenu.vercel.app/">https://crm-zlipmenu.vercel.app/</a>.</p>
                     <p>Si tienes alguna duda, contacta al administrador.</p>
                     <p>¡Gracias por usar Zlipmenu!</p>
                     <p>No Responda este correo</p>
