@@ -7,7 +7,7 @@ const { generarJWT } = require('../helpers/jwt');
 var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
 
-const crearUsuarios = async(req, res = response) => {
+const crearUsuarios = async (req, res = response) => {
 
     const { email, password } = req.body;
 
@@ -47,13 +47,13 @@ const crearUsuarios = async(req, res = response) => {
 
         // Enviar notificación de nuevo usuario al admin
         const adminTransporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 587,
+            host: "mail.zlipmenu.com",
+            port: 465,
+            secure: true,
             auth: {
-                user: env.USER_GMAIL,
-                pass: env.PASS_gmail
+                user: env.USER_EMAIL,
+                pass: env.PASS_email
             },
-            secureConnection: false,
             tls: {
                 ciphers: 'SSLv3',
                 rejectUnauthorized: false
@@ -61,7 +61,7 @@ const crearUsuarios = async(req, res = response) => {
         });
 
         const adminNotifyEmail = {
-            from: env.USER_GMAIL,
+            from: env.USER_EMAIL,
             to: 'mercadocreativo@gmail.com',
             subject: `Nuevo usuario registrado: ${usuario.username}`,
             html: `
@@ -74,6 +74,7 @@ const crearUsuarios = async(req, res = response) => {
                     <li><strong>Fecha:</strong> ${new Date().toLocaleString()}</li>
                 </ul>
                 <p>Revisa los detalles en el panel de administración.</p>
+                <p>No Responda este correo</p>
             `
         };
 
@@ -121,7 +122,7 @@ function dispatch_emails(req, res) {
         port: 587,
         auth: {
             user: env.USER_GMAIL,
-                    pass: env.PASS_gmail
+            pass: env.PASS_gmail
         },
         secureConnection: 'false',
         tls: {
@@ -144,7 +145,7 @@ function dispatch_emails(req, res) {
         html: '<h3>Attention Admin , </h3><p>A new User has registered his Access with the following Information: </br> <strong>Username : ' + user_email + '</strong></br><strong>Company Name : ' + username + '</strong></br><strong>Date of Registration : ' + Date.Now + '</strong></p>'
     };
 
-    transporter.sendMail(mailOptions, function(error, info) {
+    transporter.sendMail(mailOptions, function (error, info) {
         // if (error) throw error;
         // return res.send({ error: false, data: info, message: 'OK' });
         if (error) {
@@ -160,7 +161,7 @@ function dispatch_emails(req, res) {
         })
     })
 
-    transporter.sendMail(AdminNotifyEmail, function(error, info) {
+    transporter.sendMail(AdminNotifyEmail, function (error, info) {
         // if (error) throw error;
         // return res.send({ error: false, data: info, message: 'OK' });
         if (error) {
@@ -179,7 +180,7 @@ function dispatch_emails(req, res) {
 }
 //emvio por correo
 
-const getUsuariosList = async(req, res) => {
+const getUsuariosList = async (req, res) => {
 
 
     const usuarios = await Usuario.find({})
@@ -194,7 +195,7 @@ const getUsuariosList = async(req, res) => {
 
 };
 
-const getAllUsers = async(req, res) => {
+const getAllUsers = async (req, res) => {
     const usuarios = await Usuario.find({})
         .populate('project')
         .populate('profile');
@@ -207,7 +208,7 @@ const getAllUsers = async(req, res) => {
 
 
 
-const getUsuario = async(req, res = response) => {
+const getUsuario = async (req, res = response) => {
 
     const id = req.params.id;
 
@@ -235,7 +236,7 @@ const getUsuario = async(req, res = response) => {
 };
 
 
-const actualizarUAdmin = async(req, res = response) => {
+const actualizarUAdmin = async (req, res = response) => {
     //todo: validar token y comprobar si el usuario es correcto
 
     const uid = req.params.id;
@@ -250,10 +251,10 @@ const actualizarUAdmin = async(req, res = response) => {
         }
 
         //actualizaciones
-        const { password, google, email,  ...campos } = req.body;
+        const { password, google, email, ...campos } = req.body;
 
 
-        
+
 
         if (usuarioDB.email !== email) {
 
@@ -280,7 +281,7 @@ const actualizarUAdmin = async(req, res = response) => {
         //encriptar password
         const salt = bcrypt.genSaltSync();
         usuarioDB.password = bcrypt.hashSync(password, salt);
-            
+
         const usuarioActualizado = await Usuario.findByIdAndUpdate(uid, campos, { new: true });
 
         res.json({
@@ -297,7 +298,7 @@ const actualizarUAdmin = async(req, res = response) => {
     }
 };
 
-const actualizarUsuario = async(req, res = response) => {
+const actualizarUsuario = async (req, res = response) => {
     //todo: validar token y comprobar si el usuario es correcto
 
     const uid = req.params.id;
@@ -351,7 +352,7 @@ const actualizarUsuario = async(req, res = response) => {
         });
     }
 };
-const actualizarUsuarioRole = async(req, res = response) => {
+const actualizarUsuarioRole = async (req, res = response) => {
     //todo: validar token y comprobar si el usuario es correcto
 
     const uid = req.params.id;
@@ -394,13 +395,13 @@ const actualizarUsuarioRole = async(req, res = response) => {
         // Send welcome email if role changed
         if (campos.role && usuarioDB.role !== campos.role && usuarioActualizado.email) {
             const transporter = nodemailer.createTransport({
-                host: 'smtp.gmail.com',
-                port: 587,
+                host: "mail.zlipmenu.com",
+                port: 465,
+                secure: true,
                 auth: {
-                    user: env.USER_GMAIL,
-                    pass: env.PASS_gmail
+                    user: env.USER_EMAIL,
+                    pass: env.PASS_email
                 },
-                secureConnection: false,
                 tls: {
                     ciphers: 'SSLv3',
                     rejectUnauthorized: false
@@ -409,7 +410,7 @@ const actualizarUsuarioRole = async(req, res = response) => {
 
 
             const mailOptions = {
-                from: env.USER_GMAIL,
+                from: env.USER_EMAIL,
                 to: usuarioActualizado.email,
                 subject: '¡Bienvenido! Tu rol ha sido actualizado',
                 html: `
@@ -418,6 +419,7 @@ const actualizarUsuarioRole = async(req, res = response) => {
                     <p>Ahora puedes acceder al sistema con tus nuevos permisos.</p>
                     <p>Si tienes alguna duda, contacta al administrador.</p>
                     <p>¡Gracias por usar Zlipmenu!</p>
+                    <p>No Responda este correo</p>
                 `
             };
 
@@ -445,7 +447,7 @@ const actualizarUsuarioRole = async(req, res = response) => {
 };
 
 
-const borrarUsuario = async(req, res) => {
+const borrarUsuario = async (req, res) => {
 
     const uid = req.params.id;
 
@@ -475,7 +477,7 @@ const borrarUsuario = async(req, res) => {
     }
 };
 
-const crearEditor = async(req, res = response) => {
+const crearEditor = async (req, res = response) => {
 
     const { email, password } = req.body;
 
@@ -552,7 +554,7 @@ function set_token_recovery(req, res) {
         port: 587,
         auth: {
             user: env.USER_GMAIL,
-                    pass: env.PASS_gmail
+            pass: env.PASS_gmail
         }
     }));
 
@@ -578,7 +580,7 @@ function set_token_recovery(req, res) {
                     } else {
                         res.status(200).send({ data: user_update });
 
-                        transporter.sendMail(mailOptions, function(error, info) {
+                        transporter.sendMail(mailOptions, function (error, info) {
                             if (error) {
 
                             } else {
@@ -619,7 +621,7 @@ function change_password(req, res) {
             if (user == null) {
                 res.status(500).send({ message: "El correo electrónico no se encuentra registrado, intente nuevamente." });
             } else {
-                bcrypt.hash(params.password, null, null, function(err, hash) {
+                bcrypt.hash(params.password, null, null, function (err, hash) {
                     Usuario.findByIdAndUpdate({ _id: user._id }, { password: hash }, (err, user_update) => {
                         res.status(200).send({ data: user_update });
                     });
@@ -633,7 +635,7 @@ function change_password(req, res) {
 
 
 function newest(req, res) {
-    Usuario.find().sort({ createdAt:-1 }).limit(4).exec((err, usuarios) => {
+    Usuario.find().sort({ createdAt: -1 }).limit(4).exec((err, usuarios) => {
         if (usuarios) {
             res.status(200).send({ usuarios: usuarios });
         }
