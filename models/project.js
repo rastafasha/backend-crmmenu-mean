@@ -7,6 +7,8 @@ const projectSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    slug: { type: String, required: true },
+    num_whatsapp: { type: String, required: false },
     url: {
       type: String,
       required: true,
