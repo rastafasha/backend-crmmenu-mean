@@ -39,33 +39,36 @@ const getProjectsByUser = async (req, res) => {
 };
 
 const createProject = async (req, res) => {
-   
     const uid = req.uid;
-
-
-    // Convertir el título en slug
     const name = req.body.name || '';
-    const slug = name.toLowerCase()
-        .trim()
-        .replace(/[\s]+/g, '-') // reemplaza espacios por guiones
-        .replace(/[^\w\-]+/g, '') // elimina caracteres no alfanuméricos excepto guiones
-        .replace(/\-\-+/g, '-') // reemplaza guiones múltiples por uno solo
-        // reemplaza acentos y caracteres especiales
-        .replace(/á/g, 'a')
-        .replace(/é/g, 'e')
-        .replace(/í/g, 'i')
-        .replace(/ó/g, 'o')
-        .replace(/ú/g, 'u')
-        .replace(/ñ/g, 'n')
-        .replace(/ü/g, 'u');
 
-    const project = new Project({
-        usuario: uid,
-        slug: slug,
-        ...req.body
-    });
+    // 1. Generación correcta, segura y sin pérdidas del SLUG para el subdominio
+    const slug = name
+        .toLowerCase()
+        .trim()
+        .replace(/ñ/g, 'n') // Reemplaza la eñe primero
+        .normalize('NFD') // Descompone los acentos (ej: "í" -> "i" + símbolo de acento)
+        .replace(/[\u0300-\u036f]/g, '') // Elimina los símbolos de acentos sueltos
+        .replace(/[\s]+/g, '-') // Reemplaza espacios por guiones
+        .replace(/[^\w\-]+/g, '') // Elimina caracteres especiales que queden
+        .replace(/\-\-+/g, '-'); // Reduce guiones múltiples a uno solo
 
     try {
+        // 2. Validación de unicidad: Vital para evitar que dos comercios peleen por el mismo subdominio
+        const existeSlug = await Project.findOne({ slug });
+        if (existeSlug) {
+            return res.status(400).json({
+                ok: false,
+                msg: `El nombre elegido ya está en uso o genera un subdominio duplicado: ${slug}`
+            });
+        }
+
+        // 3. Instanciar y guardar en MongoDB Atlas
+        const project = new Project({
+            usuario: uid,
+            ...req.body,
+            slug: slug // Asegura que el slug limpio pise cualquier valor extraño enviado en req.body
+        });
 
         const projectDB = await project.save();
 
@@ -75,15 +78,14 @@ const createProject = async (req, res) => {
         });
 
     } catch (error) {
-        console.log(error);
+        console.error(error); // Mantiene el rastro del error visible en la consola de Render
         res.status(500).json({
             ok: false,
             msg: 'Hable con el admin'
         });
     }
-
-
 };
+
 
 const getProject = async (req, res) => {
     try {
