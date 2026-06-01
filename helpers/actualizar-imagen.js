@@ -1,13 +1,6 @@
 const fs = require('fs');
 const Project = require('../models/project');
 
-const borrarImagen = (path) => {
-    if (fs.existsSync(path)) {
-        // borrar la imagen anterior si usas almacenamiento local
-        fs.unlinkSync(path);
-    }
-}
-
 // 🛠️ SE AGREGA 'campoDestino' como parámetro opcional al final
 const actualizarImagen = async (tipo, id, nombreArchivo, campoDestino = null) => {
 
@@ -44,6 +37,12 @@ const actualizarImagen = async (tipo, id, nombreArchivo, campoDestino = null) =>
     }
 };
 
+const borrarImagen = (path) => {
+    if (fs.existsSync(path)) {
+        // borrar la imagen anterior si usas almacenamiento local
+        fs.unlinkSync(path);
+    }
+}
 module.exports = {
     actualizarImagen,
     borrarImagen
