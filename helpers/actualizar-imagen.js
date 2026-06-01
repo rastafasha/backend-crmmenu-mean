@@ -1,44 +1,48 @@
-
 const fs = require('fs');
-const Profile = require('../models/profile');
-const project = require('../models/project');
+const Project = require('../models/project');
 
 const borrarImagen = (path) => {
-
     if (fs.existsSync(path)) {
-        //borrar la imagen anterior
+        // borrar la imagen anterior si usas almacenamiento local
         fs.unlinkSync(path);
     }
 }
 
+// 🛠️ SE AGREGA 'campoDestino' como parámetro opcional al final
+const actualizarImagen = async (tipo, id, nombreArchivo, campoDestino = null) => {
 
-const actualizarImagen = async(tipo, id, nombreArchivo, extensionArchivo) => {
-    try {
-        const mapTipo = {
-            'profiles': await Profile.findById(id),
-            'projects': await project.findById(id),
-        }
-        const resultadoColeccion = mapTipo[tipo];
-        if (resultadoColeccion.length == 0) {
-            return false;
-        }
-         
-        const path = `../../uploads/${tipo}/${resultadoColeccion.img}`
-        if (fs.existsSync(path)) {
-            //borrar la imagen si existe
-            fs.unlinkSync(path)
-        }
-        resultadoColeccion.img = `${nombreArchivo}`; // Update the image name with concatenation
-        resultadoColeccion.extension = extensionArchivo; // Store the file extension
-        await resultadoColeccion.save();
-        return true;
+    let pathViejo = '';
 
+    switch (tipo) {
 
-    } catch (error) {
-        return false;
+        case 'projects':
+            const project = await Project.findById(id);
+            if (!project) {
+                console.log('No es un projects por id');
+                return false;
+            }
+            pathViejo = `./uploads/projects/${project.img}`;
+            borrarImagen(pathViejo);
+            project.img = nombreArchivo;
+            await project.save();
+            return true;
+            break;
+
+            const transferencia = await Transferencia.findById(id);
+            if (!transferencia) {
+                console.log('No es un transferencia por id');
+                return false;
+            }
+            if (transferencia.img) {
+                pathViejo = `./uploads/transferencias/${transferencia.img}`; // Corregido typo de variable 'driver'
+                borrarImagen(pathViejo);
+            }
+            transferencia.img = nombreArchivo;
+            await transferencia.save();
+            return true;
+            break;
     }
-}
-
+};
 
 module.exports = {
     actualizarImagen,
