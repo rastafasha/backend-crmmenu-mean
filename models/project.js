@@ -29,7 +29,7 @@ const projectSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
-    negociacio: {
+    negociacion: {
       type: String,
       required: false,
     },
