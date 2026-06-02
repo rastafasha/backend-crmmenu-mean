@@ -25,6 +25,14 @@ const projectSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    propuesta: {
+      type: String,
+      required: false,
+    },
+    negociacio: {
+      type: String,
+      required: false,
+    },
     partners: {
       type: Array,
       required: false,
