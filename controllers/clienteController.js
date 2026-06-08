@@ -1,9 +1,11 @@
 const { response } = require('express');
 const Cliente = require('../models/cliente');
+const Project = require('../models/project');
+
 
 const getClientes = async (req, res) => {
     try {
-        const clientes = await Cliente.find()
+        const clientes = await Project.find({status:true})
             .sort({ createdAt: -1 })
             .populate('category')
             .populate('pais')
