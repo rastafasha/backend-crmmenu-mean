@@ -41,33 +41,14 @@ const getProjectsByUser = async (req, res) => {
 const createProject = async (req, res) => {
     const uid = req.uid;
     const name = req.body.name || '';
-
-    // 1. Generación correcta, segura y sin pérdidas del SLUG para el subdominio
-    const slug = name
-        .toLowerCase()
-        .trim()
-        .replace(/ñ/g, 'n') // Reemplaza la eñe primero
-        .normalize('NFD') // Descompone los acentos (ej: "í" -> "i" + símbolo de acento)
-        .replace(/[\u0300-\u036f]/g, '') // Elimina los símbolos de acentos sueltos
-        .replace(/[\s]+/g, '-') // Reemplaza espacios por guiones
-        .replace(/[^\w\-]+/g, '') // Elimina caracteres especiales que queden
-        .replace(/\-\-+/g, '-'); // Reduce guiones múltiples a uno solo
-
+    
     try {
-        // 2. Validación de unicidad: Vital para evitar que dos comercios peleen por el mismo subdominio
-        const existeSlug = await Project.findOne({ slug });
-        if (existeSlug) {
-            return res.status(400).json({
-                ok: false,
-                msg: `El nombre elegido ya está en uso o genera un subdominio duplicado: ${slug}`
-            });
-        }
+       
 
         // 3. Instanciar y guardar en MongoDB Atlas
         const project = new Project({
             usuario: uid,
             ...req.body,
-            slug: slug // Asegura que el slug limpio pise cualquier valor extraño enviado en req.body
         });
 
         const projectDB = await project.save();
@@ -130,27 +111,6 @@ const updateProject = async (req, res) => {
         const cambiosProject = {
             ...req.body,
             usuario: uid
-        }
-
-        // Si viene el nombre actualizado, generar el slug correctamente
-        if (req.body.name) {
-            const slug = req.body.name
-                .toLowerCase()
-                .trim()
-                // 1. Reemplaza la eñe antes de normalizar
-                .replace(/ñ/g, 'n') 
-                // 2. Descompone los acentos (ej: "á" se convierte en "a" + un símbolo de acento)
-                .normalize('NFD') 
-                // 3. Elimina todos los símbolos de acentos sueltos
-                .replace(/[\u0300-\u036f]/g, '') 
-                // 4. Reemplaza espacios por guiones
-                .replace(/[\s]+/g, '-') 
-                // 5. Elimina caracteres no alfanuméricos que queden
-                .replace(/[^\w\-]+/g, '') 
-                // 6. Reduce múltiples guiones a uno solo
-                .replace(/\-\-+/g, '-');
-
-            cambiosProject.slug = slug;
         }
 
         const projectActualizado = await Project.findByIdAndUpdate(id, cambiosProject, { new: true });
