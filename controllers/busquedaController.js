@@ -7,15 +7,13 @@ const Cliente = require('../models/cliente');
 
 const getTodo = async(req, res = response) => {
 
-    const busqueda = req.params.busqueda;
+    // Si no viene búsqueda, usamos un string vacío en lugar de undefined
+    const busqueda = req.params.busqueda || ''; 
     const typeFilter = req.query.type || null;
-    const regex = new RegExp(busqueda, 'i');
-
-    // Build project query filter
-    let projectFilter = { name: regex };
-    if (typeFilter) {
-        projectFilter.type = typeFilter;
-    }
+    const estadoFilter = req.query.estado_seguimiento || null; 
+    // Si la búsqueda está vacía, hacemos que machee con todo (.*) en lugar de fallar
+    const regexStr = busqueda === '' ? '.*' : busqueda;
+    const regex = new RegExp(regexStr, 'i');
 
     // First, find categories that match the search
     const categorias = await Categoria.find({ nombre: regex });
@@ -24,7 +22,6 @@ const getTodo = async(req, res = response) => {
     // Find matching pais
     const matchingPaises = await Pais.find({ pais: regex });
     const paisIds = matchingPaises.map(p => p._id);
-
 
     // Then, find projects that match either name or category or pais in the list
     const projectsFilter = {
@@ -36,8 +33,14 @@ const getTodo = async(req, res = response) => {
             { pais: { $in: paisIds } }
         ]
     };
+    
     if (typeFilter) {
         projectsFilter.type = typeFilter;
+    }
+
+    // 2. APLICAR EL FILTRO DE ESTADO EN LA BÚSQUEDA GLOBAL DE PROYECTOS
+    if (estadoFilter) {
+        projectsFilter.estado_seguimiento = estadoFilter;
     }
 
     const [usuarios, projects, categoria, clientes] = await Promise.all([
@@ -60,10 +63,14 @@ const getTodo = async(req, res = response) => {
 
 const getDocumentosColeccion = async(req, res = response) => {
 
-    const tabla = req.params.tabla;
+     const tabla = req.params.tabla;
     const busqueda = req.params.busqueda;
     const typeFilter = req.query.type || null;
-    const regex = new RegExp(busqueda, 'i');
+    const estadoFilter = req.query.estado_seguimiento || null;
+    
+    // Si el parámetro es 'all', usamos una expresión regular que traiga todo
+    const regexStr = busqueda === 'all' ? '.*' : busqueda;
+    const regex = new RegExp(regexStr, 'i');
 
     let data = [];
 
@@ -75,27 +82,34 @@ const getDocumentosColeccion = async(req, res = response) => {
             data = await Categoria.find({ nombre: regex });
             break;
         case 'projects':
-            // First, find categories that match the search
             const categorias = await Categoria.find({ nombre: regex });
             const categoriaIds = categorias.map(cat => cat._id);
 
-            // Find matching pais
             const matchingPaises = await Pais.find({ pais: regex });
             const paisIds = matchingPaises.map(p => p._id);
 
-            // Then, find projects that match either name or category or pais
-            let projectsFilter = {
-                $or: [
+            let projectsFilter = {};
+
+            // Si es una búsqueda real por texto, aplicamos el $or
+            if (busqueda !== 'all') {
+                projectsFilter.$or = [
                     { name: regex },
                     { ubicacion: regex },
                     { tipoMenu: regex },
                     { category: { $in: categoriaIds } },
                     { pais: { $in: paisIds } }
-                ]
-            };
+                ];
+            }
+
             if (typeFilter) {
                 projectsFilter.type = typeFilter;
             }
+            
+            // Aplicamos el filtro de estado de manera limpia
+            if (estadoFilter) {
+                projectsFilter.estado_seguimiento = estadoFilter;
+            }
+
             data = await Project.find(projectsFilter).populate('category', 'nombre');
             break;
         case 'pais':
@@ -121,4 +135,3 @@ module.exports = {
     getTodo,
     getDocumentosColeccion
 }
-

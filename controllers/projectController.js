@@ -148,6 +148,9 @@ function updateStatus(req, res) {
 
 const listarProyectPorCategoria = async (req, res) => {
     var nombre = req.params['nombre'];
+    // 1. CAPTURAR EL NUEVO FILTRO DE ESTADO DESDE LA QUERY URL
+    const estadoFilter = req.query.estado_seguimiento || null;
+
     try {
         // First, find the category by name
         const Categoria = require('../models/categoria');
@@ -157,8 +160,16 @@ const listarProyectPorCategoria = async (req, res) => {
             return res.status(404).json({ message: 'Categoría no encontrada' });
         }
         
-        // Then, find projects using the category's ObjectId
-        const projects = await Project.find({ category: categoria._id })
+        // 2. CONSTRUIR EL FILTRO DE BÚSQUEDA DINÁMICO
+        let projectsFilter = { category: categoria._id };
+
+        // Si el usuario envió un estado, lo agregamos al filtro de la consulta
+        if (estadoFilter) {
+            projectsFilter.estado_seguimiento = estadoFilter;
+        }
+        
+        // Then, find projects using the category's ObjectId and the filters
+        const projects = await Project.find(projectsFilter)
             .populate('category')
             .populate('pais');
         
@@ -167,6 +178,7 @@ const listarProyectPorCategoria = async (req, res) => {
         res.status(500).send({ error: err });
     }
 }
+
 
 
 module.exports = {
