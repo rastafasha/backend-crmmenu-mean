@@ -12,7 +12,8 @@ const {
     deleteProject,
     getProjectsByUser,
     updateStatus,
-    listarProyectPorCategoria
+    listarProyectPorCategoria,
+    checkExistenceByName
 } = require('../controllers/projectController.js');
 
 const { validarJWT } = require('../middlewares/validar-jwt');
@@ -25,6 +26,7 @@ router.get('/',
     getProjects);
 router.get('/user/:id',   getProjectsByUser);
 router.get('/category/:nombre',   listarProyectPorCategoria);
+router.get('/existencia/:name', checkExistenceByName);
 
 router.get('/:id',  
     validarJWT,

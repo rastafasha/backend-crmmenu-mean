@@ -180,6 +180,33 @@ const listarProyectPorCategoria = async (req, res) => {
 }
 
 
+const checkExistenceByName = async(req, res) => {
+    const { name } = req.params;
+
+    try {
+        const project = await Project.findOne({ name: name });
+
+        if (project) {
+            return res.json({
+                ok: true,
+                exists: true,
+                message: 'Project with this name already exists.'
+            });
+        } else {
+            return res.json({
+                ok: true,
+                exists: false,
+                message: 'No project found with this name.'
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            ok: false,
+            message: 'Server error while checking project existence.'
+        });
+    }
+}
 
 module.exports = {
     getProjects,
@@ -189,7 +216,8 @@ module.exports = {
     deleteProject,
     updateProject,
     updateStatus,
-    listarProyectPorCategoria
+    listarProyectPorCategoria,
+    checkExistenceByName
 
 
 };
